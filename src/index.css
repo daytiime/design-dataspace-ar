@@ -1,17 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Token tooling and the generated design-system reference are not application
- * source — keep Tailwind's content scanner off them so class-name-like strings
- * in docs/scripts don't synthesize unused utilities. */
-@source not "../design-system.md";
+/* Token tooling is not application source — keep Tailwind's content scanner
+ * off it so class-name-like strings in docs/scripts don't synthesize unused
+ * utilities. */
 @source not "../scripts";
 @source not "../tokens.json";
 @source not "../civicdataspace-auth-flow.html";
 
-/* Design tokens — :root custom properties + @theme inline.
- * GENERATED from the canonical /tokens.json via `npm run gen:tokens`.
- * Edit tokens.json, not this import or the generated file. */
+/* Design tokens — GENERATED from the canonical /tokens.json via `npm run
+ * gen:tokens`. Edit tokens.json, not these imports or the generated files.
+ * _variables.css (CDS primitive + semantic palette) must load before
+ * tokens.css (this app's Tailwind theme layer + @theme inline), since
+ * tokens.css aliases onto the custom properties _variables.css defines. */
+@import "../styles/tokens/_variables.css";
 @import "./generated/tokens.css";
 
 @custom-variant dark (&:is(.dark *));

@@ -1,6 +1,12 @@
 /* GENERATED FROM tokens.json — DO NOT EDIT.
  * Regenerate with: npm run gen:tokens
  * Canonical source of truth: ../../tokens.json
+ *
+ * This app's Tailwind v4 theme layer. Every custom property below aliases a
+ * CDS primitive defined in styles/tokens/_variables.css (imported first by
+ * src/index.css) — shadcn/ui role names (--primary, --background, ...) have
+ * no equivalent in CDS's own vocabulary, so this mapping is hand-maintained
+ * in scripts/generate-tokens.mjs rather than derived from tokens.json.
  */
 
 :root {
@@ -8,7 +14,7 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Border radius */
+  /* Border radius — app-specific proportional scale, no CDS equivalent */
   --radius: 0.625rem;
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
@@ -16,51 +22,51 @@
   --radius-xl: calc(var(--radius) + 8px);
 
   /* Base, brand & semantic colors */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #0b3865;
-  --primary-foreground: #ffffff;
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: #fdb557;
-  --accent-foreground: #0b3865;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #ffffff;
-  --success: #46a758;
-  --success-foreground: #ffffff;
-  --warning: #ffc53d;
-  --warning-foreground: #0b3865;
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: #0b3865;
+  --background: var(--surface-default);
+  --foreground: var(--text-default);
+  --card: var(--surface-default);
+  --card-foreground: var(--text-default);
+  --popover: var(--surface-default);
+  --popover-foreground: var(--text-default);
+  --primary: var(--brand-blue-primary-color);
+  --primary-foreground: var(--brand-white);
+  --secondary: var(--surface-subdued);
+  --secondary-foreground: var(--text-default);
+  --muted: var(--surface-subdued);
+  --muted-foreground: var(--text-medium);
+  --accent: var(--brand-orange-secondary-color);
+  --accent-foreground: var(--brand-blue-primary-color);
+  --destructive: var(--action-primary-critical-default);
+  --destructive-foreground: var(--brand-white);
+  --success: var(--action-primary-success-default);
+  --success-foreground: var(--brand-white);
+  --warning: var(--base-amber-solid-9);
+  --warning-foreground: var(--brand-blue-primary-color);
+  --border: var(--border-disabled);
+  --input: var(--border-disabled);
+  --ring: var(--brand-blue-primary-color);
 
   /* Chart palette */
-  --chart-1: #fdb557;
-  --chart-2: oklch(0.705 0.213 47.604);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.553 0.195 38.402);
-  --chart-5: oklch(0.47 0.157 37.304);
+  --chart-1: var(--brand-orange-secondary-color);
+  --chart-2: var(--brand-chart-2);
+  --chart-3: var(--brand-chart-3);
+  --chart-4: var(--brand-chart-4);
+  --chart-5: var(--brand-chart-5);
 
   /* Sidebar */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #0b3865;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fdb557;
-  --sidebar-accent-foreground: #0b3865;
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: #0b3865;
+  --sidebar: var(--base-gray-slate-solid-1);
+  --sidebar-foreground: var(--text-default);
+  --sidebar-primary: var(--brand-blue-primary-color);
+  --sidebar-primary-foreground: var(--brand-white);
+  --sidebar-accent: var(--brand-orange-secondary-color);
+  --sidebar-accent-foreground: var(--brand-blue-primary-color);
+  --sidebar-border: var(--border-disabled);
+  --sidebar-ring: var(--brand-blue-primary-color);
 
   /* App-chrome surfaces */
-  --page-background: #f3f5f8;
-  --header-background: #0b2540;
-  --breadcrumb-background: #fdb557;
+  --page-background: var(--base-gray-slate-solid-3);
+  --header-background: var(--brand-header-background-color);
+  --breadcrumb-background: var(--brand-orange-secondary-color);
 }
 
 @theme inline {
