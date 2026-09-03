@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * Generates, from the canonical tokens.json (CDS collections/modes/variables shape):
- *   1. styles/tokens/_variables.css  — the CDS primitive + semantic palette as plain
- *      :root custom properties (alias tokens become var() references, matching
- *      CivicDataLab/DataSpaceFrontend's styles/tokens/_variables.css format).
+ *   1. styles/tokens/_variables.css  — the subset of CDS color primitives this app's
+ *      theme layer actually resolves to, as plain :root custom properties (alias tokens
+ *      become var() references), in CivicDataLab/DataSpaceFrontend's _variables.css
+ *      naming style. Pruned, not the full palette — see the comment in buildVariablesCss.
  *   2. src/generated/tokens.css      — this app's Tailwind v4 theme layer: shadcn/ui's
  *      expected custom properties (--primary, --background, --success, ...) aliased
  *      onto the CDS primitives from _variables.css, plus the @theme inline block.
@@ -27,67 +28,6 @@ const variablesOf = (collectionName, modeName) => {
   const col = findCollection(collectionName)
   const mode = modeName ? col.modes.find((m) => m.name === modeName) : col.modes[0]
   return mode.variables
-}
-
-/* ------------------------------------------------------- styles/tokens/_variables.css ---- */
-function cssLine(v, formatLiteral) {
-  const name = `--${kebab(v.name)}`
-  const value = v.isAlias ? `var(--${kebab(v.value.name)})` : formatLiteral(v.value)
-  return `  ${name}: ${value};`
-}
-
-function buildVariablesCss() {
-  const lines = []
-
-  lines.push('  /* Colors */')
-  for (const v of variablesOf('Colors', 'Light')) lines.push(cssLine(v, (s) => s))
-  lines.push('')
-
-  lines.push('  /* Spacing */')
-  for (const v of variablesOf('Spacing / Numericals')) lines.push(cssLine(v, (n) => `${n}px`))
-  lines.push('')
-
-  lines.push('  /* Borders */')
-  for (const v of variablesOf('Borders')) lines.push(cssLine(v, (n) => `${n}px`))
-  lines.push('')
-
-  lines.push('  /* Effects (shadows) */')
-  for (const v of variablesOf('Effects')) {
-    const name = `--${kebab(v.name)}`
-    const layers = v.value.effects.map((e) => {
-      const inset = e.type === 'INNER_SHADOW' ? 'inset ' : ''
-      const { r, g, b, a } = e.color
-      return `${inset}${e.offset.x}px ${e.offset.y}px ${e.radius}px ${e.spread}px rgba(${r}, ${g}, ${b}, ${a})`
-    })
-    lines.push(`  ${name}: ${layers.join(', ')};`)
-  }
-  lines.push('')
-
-  lines.push('  /* Typography scale */')
-  for (const v of variablesOf('Typography Scale')) lines.push(cssLine(v, (s) => s))
-  lines.push('')
-
-  lines.push('  /* Motion */')
-  for (const v of variablesOf('Motion')) lines.push(cssLine(v, (s) => s))
-  lines.push('')
-
-  lines.push('  /* Z-index */')
-  for (const v of variablesOf('Z-Index')) lines.push(cssLine(v, (n) => `${n}`))
-
-  return `/* GENERATED FROM tokens.json — DO NOT EDIT.
- * Regenerate with: npm run gen:tokens
- * Canonical source of truth: ../../tokens.json
- *
- * CDS primitive + semantic palette. This app's own Tailwind theme
- * (shadcn/ui roles like --primary, --background) lives in
- * src/generated/tokens.css and aliases onto the custom properties below —
- * that file must be imported after this one.
- */
-
-:root {
-${lines.join('\n').replace(/\n+$/, '')}
-}
-`
 }
 
 /* ------------------------------------------------ src/generated/tokens.css (app theme) ---- */
@@ -140,6 +80,66 @@ const surfaceRoleMap = {
   'page-background': 'base-gray-slate-solid-3',
   'header-background': 'brand-header-background-color',
   'breadcrumb-background': 'brand-orange-secondary-color',
+}
+
+/* ------------------------------------------------------- styles/tokens/_variables.css ---- */
+// tokens.json carries the full reconciled CDS palette (295 color tokens), but this app
+// only ever reaches CDS primitives through the four role maps above — nothing in src/
+// references a base/semantic CDS token directly (verified by grep). So _variables.css is
+// pruned to the transitive closure of what those role maps actually resolve to, rather
+// than shipping ~275 unused custom properties. Extend a role map (or add roots here) and
+// rerun `npm run gen:tokens` to pull more of tokens.json's palette in.
+function usedColorNames() {
+  const byKebab = new Map()
+  for (const v of variablesOf('Colors', 'Light')) byKebab.set(kebab(v.name), v)
+
+  const roots = [
+    ...Object.values(colorRoleMap),
+    ...Object.values(chartRoleMap),
+    ...Object.values(sidebarRoleMap),
+    ...Object.values(surfaceRoleMap),
+  ]
+  const used = new Set()
+  const stack = [...roots]
+  while (stack.length) {
+    const name = stack.pop()
+    if (used.has(name)) continue
+    used.add(name)
+    const v = byKebab.get(name)
+    if (!v) throw new Error(`role map references unknown CDS primitive: --${name}`)
+    if (v.isAlias) stack.push(kebab(v.value.name))
+  }
+  return used
+}
+
+function cssLine(v, formatLiteral) {
+  const name = `--${kebab(v.name)}`
+  const value = v.isAlias ? `var(--${kebab(v.value.name)})` : formatLiteral(v.value)
+  return `  ${name}: ${value};`
+}
+
+function buildVariablesCss() {
+  const used = usedColorNames()
+  const lines = []
+  for (const v of variablesOf('Colors', 'Light')) {
+    if (used.has(kebab(v.name))) lines.push(cssLine(v, (s) => s))
+  }
+
+  return `/* GENERATED FROM tokens.json — DO NOT EDIT.
+ * Regenerate with: npm run gen:tokens
+ * Canonical source of truth: ../../tokens.json
+ *
+ * CDS color primitives — pruned to the ${used.size} of tokens.json's 295 that this app's
+ * theme layer (src/generated/tokens.css) actually resolves to. tokens.json itself still
+ * carries the full palette (base color scales, semantic layer, spacing, borders, effects,
+ * typography, motion, z-index) as a complete reconciled reference; nothing here or in the
+ * app is meant to be the canonical CDS source, just what's wired up today.
+ */
+
+:root {
+${lines.join('\n')}
+}
+`
 }
 
 function buildAppThemeCss() {
@@ -210,7 +210,8 @@ mkdirSync(resolve(root, 'src/generated'), { recursive: true })
 writeFileSync(resolve(root, 'styles/tokens/_variables.css'), buildVariablesCss())
 writeFileSync(resolve(root, 'src/generated/tokens.css'), buildAppThemeCss())
 
-const colorCount = variablesOf('Colors', 'Light').length
+const totalColors = variablesOf('Colors', 'Light').length
+const used = usedColorNames()
 console.log(
-  `[gen:tokens] ${colorCount} color tokens → styles/tokens/_variables.css; app theme layer → src/generated/tokens.css`,
+  `[gen:tokens] ${used.size}/${totalColors} color tokens used → styles/tokens/_variables.css; app theme layer → src/generated/tokens.css`,
 )
