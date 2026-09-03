@@ -3,10 +3,11 @@
  * Canonical source of truth: ../../tokens.json
  *
  * CDS color primitives — pruned to the 25 of tokens.json's 295 that this app's
- * theme layer (src/generated/tokens.css) actually resolves to. tokens.json itself still
- * carries the full palette (base color scales, semantic layer, spacing, borders, effects,
- * typography, motion, z-index) as a complete reconciled reference; nothing here or in the
- * app is meant to be the canonical CDS source, just what's wired up today.
+ * theme layer (src/generated/tokens.css, derived from tokens.json's "App Theme"
+ * collection) actually resolves to. tokens.json itself still carries the full palette
+ * (base color scales, semantic layer, spacing, borders, effects, typography, motion,
+ * z-index) as a complete reconciled reference; nothing here or in the app is meant to be
+ * the canonical CDS source, just what's wired up today.
  */
 
 :root {

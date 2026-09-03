@@ -1,12 +1,13 @@
 /* GENERATED FROM tokens.json — DO NOT EDIT.
  * Regenerate with: npm run gen:tokens
- * Canonical source of truth: ../../tokens.json
+ * Canonical source of truth: ../../tokens.json ("App Theme" collection)
  *
- * This app's Tailwind v4 theme layer. Every custom property below aliases a
+ * This app's Tailwind v4 theme layer. Every color custom property below aliases a
  * CDS primitive defined in styles/tokens/_variables.css (imported first by
- * src/index.css) — shadcn/ui role names (--primary, --background, ...) have
- * no equivalent in CDS's own vocabulary, so this mapping is hand-maintained
- * in scripts/generate-tokens.mjs rather than derived from tokens.json.
+ * src/index.css) — shadcn/ui role names (--primary, --background, ...) have no
+ * equivalent in CDS's own vocabulary, so tokens.json's "App Theme" collection
+ * hand-maps them; font-family and the radius scale have no CDS equivalent at all
+ * and are literal there.
  */
 
 :root {
@@ -14,10 +15,10 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Border radius — app-specific proportional scale, no CDS equivalent */
+  /* Border radius */
   --radius: 0.625rem;
-  --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
   --radius-lg: calc(var(--radius) + 4px);
   --radius-xl: calc(var(--radius) + 8px);
 
@@ -75,8 +76,8 @@
   --font-mono: var(--font-mono);
 
   /* Border radius */
-  --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
+  --radius-sm: var(--radius-sm);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
 
