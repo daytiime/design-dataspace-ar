@@ -13,6 +13,13 @@
  * tokens.json is the ONLY hand-authored source — including the app-role -> CDS-primitive
  * mapping, which lives in tokens.json's "App Theme" collection rather than as a hardcoded
  * table in this script. Never edit the two generated files directly.
+ *
+ * tokens.json's top-level `collections` array is scoped to what this app actually uses
+ * (a pruned Colors collection + App Theme) — this script only ever reads that key. The
+ * full reconciled CDS palette (base scales, semantic layer, spacing, borders, effects,
+ * typography, motion, z-index) lives under the sibling `unusedCollections` key instead of
+ * being deleted; it's inert reference material, not read here. Bringing a token back into
+ * use means moving its collection (or entry) from `unusedCollections` into `collections`.
  *   Run: npm run gen:tokens   (also runs automatically via predev / prebuild)
  *
  * Load order matters: src/index.css must import _variables.css before tokens.css,
@@ -36,12 +43,12 @@ const variablesOf = (collectionName, modeName) => {
 const appTheme = variablesOf('App Theme', 'Light')
 
 /* ------------------------------------------------------- styles/tokens/_variables.css ---- */
-// tokens.json carries the full reconciled CDS palette (295 color tokens), but this app
-// only ever reaches CDS primitives through "App Theme"'s color aliases — nothing in src/
-// references a base/semantic CDS token directly (verified by grep). So _variables.css is
-// pruned to the transitive closure of what "App Theme" actually resolves to, rather than
-// shipping ~275 unused custom properties. Add more aliases to "App Theme" in tokens.json
-// and rerun `npm run gen:tokens` to pull more of the palette in.
+// tokens.json's active Colors collection is already scoped to what this app uses, but this
+// still walks the transitive closure of "App Theme"'s color aliases as a validity check: if
+// "App Theme" ever references a primitive that isn't in the active Colors collection (e.g.
+// one still parked under the top-level `unusedCollections` key), this throws instead of
+// silently emitting a broken var() reference — the fix is to move that entry from
+// `unusedCollections` into `collections` and rerun `npm run gen:tokens`.
 function usedColorNames() {
   const byKebab = new Map()
   for (const v of variablesOf('Colors', 'Light')) byKebab.set(kebab(v.name), v)
@@ -79,12 +86,11 @@ function buildVariablesCss() {
  * Regenerate with: npm run gen:tokens
  * Canonical source of truth: ../../tokens.json
  *
- * CDS color primitives — pruned to the ${used.size} of tokens.json's 295 that this app's
- * theme layer (src/generated/tokens.css, derived from tokens.json's "App Theme"
- * collection) actually resolves to. tokens.json itself still carries the full palette
- * (base color scales, semantic layer, spacing, borders, effects, typography, motion,
- * z-index) as a complete reconciled reference; nothing here or in the app is meant to be
- * the canonical CDS source, just what's wired up today.
+ * The ${used.size} CDS color primitives this app's theme layer (src/generated/tokens.css,
+ * derived from tokens.json's "App Theme" collection) actually resolves to. The full
+ * reconciled CDS palette (base color scales, semantic layer, spacing, borders, effects,
+ * typography, motion, z-index) lives under tokens.json's \`unusedCollections\` key instead
+ * of being deleted — kept as reference, not read by this script.
  */
 
 :root {
